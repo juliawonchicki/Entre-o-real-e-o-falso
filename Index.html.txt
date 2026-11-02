@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entre o Real e o Falso - Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Variáveis para Tema Claro (Padrão) */
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --primary-color: #2563eb;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    /* Variáveis para Tema Escuro */
+    [data-theme="dark"] {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border-color: #334155;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      padding: 2rem 1rem;
+    }
+
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-top: 0.25rem;
+    }
+
+    .theme-btn {
+      background-color: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .theme-btn:hover {
+      border-color: var(--primary-color);
+    }
+
+    /* KPIs */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .kpi-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .kpi-card h3 {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+    }
+
+    .kpi-tag {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      background-color: #e0f2fe;
+      color: #0369a1;
+      font-weight: 600;
+    }
+
+    .kpi-tag.warning { background-color: #fef3c7; color: #b45309; }
+    .kpi-tag.success { background-color: #dcfce7; color: #15803d; }
+    .kpi-tag.danger { background-color: #fee2e2; color: #b91c1c; }
+
+    /* Gráficos */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .chart-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .chart-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .chart-card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Cabeçalho -->
+    <header class="header">
+      <div>
+        <h1>Entre o Real e o Falso</h1>
+        <p class="subtitle">Análise de dados da pesquisa sobre IA e Desinformação (20 Respostas)[cite: 1, 2, 3, 4, 5]</p>
+      </div>
+      <button id="theme-toggle" class="theme-btn">
+        <span id="theme-icon">🌙</span> <span id="theme-text">Modo Escuro</span>
+      </button>
+    </header>
+
+    <!-- Métricas Rápidas (KPIs) -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <h3>Total de Respostas</h3>
+        <p class="kpi-value">20</p>
+        <span class="kpi-tag">100% Amostra</span>[cite: 1, 2, 3, 4, 5]
+      </div>
+      <div class="kpi-card">
+        <h3>Exposição a IA</h3>
+        <p class="kpi-value">100%</p>
+        <span class="kpi-tag warning">Já suspeitaram de mídias com IA</span>[cite: 1]
+      </div>
+      <div class="kpi-card">
+        <h3>Verificação Ativa</h3>
+        <p class="kpi-value">60%</p>
+        <span class="kpi-tag success">Verificam fontes sempre/frequentemente</span>[cite: 2]
+      </div>
+      <div class="kpi-card">
+        <h3>Risco de Desinformação</h3>
+        <p class="kpi-value">45%</p>
+        <span class="kpi-tag danger">Já compartilharam fake news</span>[cite: 4]
+      </div>
+    </section>
+
+    <!-- Gráficos -->
+    <section class="charts-grid">
+      <div class="chart-card">
+        <h2>1. Você já encontrou imagens ou vídeos que suspeitou terem sido manipulados por IA?</h2>
+        <div class="chart-container">
+          <canvas id="chart1"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h2>2. Com que frequência você verifica a fonte de uma notícia antes de compartilhá-la?</h2>
+        <div class="chart-container">
+          <canvas id="chart2"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h2>3. Onde você costuma encontrar notícias e informações?</h2>
+        <div class="chart-container">
+          <canvas id="chart3"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h2>4. Você já compartilhou alguma informação e depois descobriu que ela era falsa?</h2>
+        <div class="chart-container">
+          <canvas id="chart4"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card full-width">
+        <h2>5. Você acredita que consegue identificar um conteúdo manipulado por inteligência artificial?</h2>
+        <div class="chart-container">
+          <canvas id="chart5"></canvas>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Configuração e Dados dos Gráficos com base na pesquisa[cite: 1, 2, 3, 4, 5]
+    const surveyData = {
+      q1: {
+        labels: ['Sim, várias vezes', 'Sim, algumas vezes', 'Nunca', 'Não tenho certeza'],
+        data: [70, 30, 0, 0], //[cite: 1]
+        colors: ['#2563eb', '#ef4444', '#f59e0b', '#10b981']
+      },
+      q2: {
+        labels: ['Sempre', 'Na maioria das vezes', 'Às vezes', 'Raramente', 'Nunca'],
+        data: [25, 35, 10, 10, 20], //[cite: 2]
+        colors: ['#2563eb', '#ef4444', '#f59e0b', '#10b981', '#a855f7']
+      },
+      q3: {
+        labels: ['Sites de notícias', 'TikTok', 'Instagram', 'Outros', 'WhatsApp', 'YouTube'],
+        data: [35, 25, 20, 10, 5, 5], //[cite: 3]
+        colors: ['#10b981', '#ef4444', '#2563eb', '#06b6d4', '#a855f7', '#f59e0b']
+      },
+      q4: {
+        labels: ['Sim', 'Não', 'Não tenho certeza'],
+        data: [45, 25, 30], //[cite: 4]
+        colors: ['#2563eb', '#ef4444', '#f59e0b']
+      },
+      q5: {
+        labels: ['Na maioria das vezes', 'Sim, com facilidade', 'Não consigo identificar', 'Tenho dificuldade'],
+        data: [50, 25, 20, 5], //[cite: 5]
+        colors: ['#ef4444', '#2563eb', '#10b981', '#f59e0b']
+      }
+    };
+
+    let chartInstances = {};
+
+    function renderCharts(textColor) {
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: textColor, font: { family: 'sans-serif', size: 12 } }
+          }
+        }
+      };
+
+      // Gráfico 1 - Rosca
+      if (chartInstances.c1) chartInstances.c1.destroy();
+      chartInstances.c1 = new Chart(document.getElementById('chart1'), {
+        type: 'doughnut',
+        data: {
+          labels: surveyData.q1.labels,
+          datasets: [{ data: surveyData.q1.data, backgroundColor: surveyData.q1.colors }]
+        },
+        options: commonOptions
+      });
+
+      // Gráfico 2 - Rosca
+      if (chartInstances.c2) chartInstances.c2.destroy();
+      chartInstances.c2 = new Chart(document.getElementById('chart2'), {
+        type: 'doughnut',
+        data: {
+          labels: surveyData.q2.labels,
+          datasets: [{ data: surveyData.q2.data, backgroundColor: surveyData.q2.colors }]
+        },
+        options: commonOptions
+      });
+
+      // Gráfico 3 - Barra
+      if (chartInstances.c3) chartInstances.c3.destroy();
+      chartInstances.c3 = new Chart(document.getElementById('chart3'), {
+        type: 'bar',
+        data: {
+          labels: surveyData.q3.labels,
+          datasets: [{
+            label: 'Porcentagem (%)',
+            data: surveyData.q3.data,
+            backgroundColor: surveyData.q3.colors
+          }]
+        },
+        options: {
+          ...commonOptions,
+          scales: {
+            x: { ticks: { color: textColor }, grid: { display: false } },
+            y: { ticks: { color: textColor }, grid: { color: 'rgba(150, 150, 150, 0.1)' } }
+          }
+        }
+      });
+
+      // Gráfico 4 - Rosca
+      if (chartInstances.c4) chartInstances.c4.destroy();
+      chartInstances.c4 = new Chart(document.getElementById('chart4'), {
+        type: 'doughnut',
+        data: {
+          labels: surveyData.q4.labels,
+          datasets: [{ data: surveyData.q4.data, backgroundColor: surveyData.q4.colors }]
+        },
+        options: commonOptions
+      });
+
+      // Gráfico 5 - Barra Horizontal
+      if (chartInstances.c5) chartInstances.c5.destroy();
+      chartInstances.c5 = new Chart(document.getElementById('chart5'), {
+        type: 'bar',
+        data: {
+          labels: surveyData.q5.labels,
+          datasets: [{
+            label: 'Porcentagem (%)',
+            data: surveyData.q5.data,
+            backgroundColor: surveyData.q5.colors
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          ...commonOptions,
+          scales: {
+            x: { ticks: { color: textColor }, grid: { color: 'rgba(150, 150, 150, 0.1)' } },
+            y: { ticks: { color: textColor }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // Lógica de Alternância de Tema
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const themeText = document.getElementById('theme-text');
+
+    function getTextColor() {
+      return document.documentElement.getAttribute('data-theme') === 'dark' ? '#f8fafc' : '#0f172a';
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+      themeText.textContent = newTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro';
+
+      renderCharts(getTextColor());
+    });
+
+    // Renderização inicial
+    renderCharts(getTextColor());
+  </script>
+</body>
+</html>
